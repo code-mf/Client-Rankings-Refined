@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Pairing Recommendation App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .upload-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 20px 0;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .results-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #eee;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .tab.active {
+            border-bottom-color: #667eea;
+            color: #667eea;
+        }
+
+        .tab:hover {
+            background: #f8f9fa;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .team-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #28a745;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .team-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .client-name {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        .team-score {
+            background: #28a745;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .team-members {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .member-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+
+        .member-name {
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 5px;
+        }
+
+        .member-email {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .member-ranking {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .rank-badge {
+            background: #667eea;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .compatibility-score {
+            background: #17a2b8;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .download-section {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .download-btn {
+            background: #28a745;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin: 0 10px;
+        }
+
+        .download-btn:hover {
+            background: #218838;
+        }
+
+        .secondary-btn {
+            background: #6c757d;
+        }
+
+        .secondary-btn:hover {
+            background: #5a6268;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #f5c6cb;
+        }
+
+        .info-box {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #bee5eb;
+        }
+
+        .pairing-options {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .option-group {
+            margin-bottom: 15px;
+        }
+
+        .option-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .option-group select, .option-group input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .team-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .team-members {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>👥 Team Pairing Recommendation App</h1>
+            <p>Create optimal two-person teams for client projects based on student preferences</p>
+        </div>
+
+        <div class="upload-section">
+            <h3>📁 Upload Client Ranking Responses</h3>
+            <p>Select the CSV file containing student rankings</p>
+            <input type="file" id="fileInput" class="file-input" accept=".csv">
+            <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                Choose CSV File
+            </button>
+            <div id="fileName"></div>
+        </div>
+
+        <div id="resultsSection" class="results-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalStudents">0</div>
+                    <div class="stat-label">Total Students</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalClients">0</div>
+                    <div class="stat-label">Total Clients</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalTeams">0</div>
+                    <div class="stat-label">Teams Created</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="avgTeamScore">0</div>
+                    <div class="stat-label">Avg Team Score</div>
+                </div>
+            </div>
+
+            <div class="tabs">
+                <div class="tab active" onclick="showTab('teams')">🏆 Team Recommendations</div>
+                <div class="tab" onclick="showTab('individual')">👤 Individual Rankings</div>
+                <div class="tab" onclick="showTab('clients')">🏢 Client Analysis</div>
+                <div class="tab" onclick="showTab('unassigned')">⚠️ Unassigned</div>
+            </div>
+
+            <div id="teamsTab" class="tab-content active">
+                <div class="pairing-options">
+                    <h3>⚙️ Pairing Options</h3>
+                    <div class="filters">
+                        <div class="option-group">
+                            <label for="pairingAlgorithm">Pairing Algorithm:</label>
+                            <select id="pairingAlgorithm" onchange="updateTeamRecommendations()">
+                                <option value="top11">All Students Balanced (Lead + Support)</option>
+                                <option value="balanced">Balanced</option>
+                                <option value="greedy">Greedy (Fast)</option>
+                                <option value="preference">Preference-First</option>
+                            </select>
+                        </div>
+                        <div class="option-group">
+                            <label for="maxTeamScore">Max Team Score:</label>
+                            <input type="number" id="maxTeamScore" value="10" min="2" max="40" onchange="updateTeamRecommendations()">
+                        </div>
+                        <div class="option-group">
+                            <label for="minTeamSize">Min Team Size:</label>
+                            <select id="minTeamSize" onchange="updateTeamRecommendations()">
+                                <option value="2">2 Students</option>
+                                <option value="1">1 Student</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <h3>🏆 Recommended Team Pairings</h3>
+                <div id="teamsContent"></div>
+            </div>
+
+            <div id="individualTab" class="tab-content">
+                <h3>👤 Individual Student Rankings</h3>
+                <div id="individualContent"></div>
+            </div>
+
+            <div id="clientsTab" class="tab-content">
+                <h3>🏢 Client Analysis</h3>
+                <div id="clientsContent"></div>
+            </div>
+
+            <div id="unassignedTab" class="tab-content">
+                <h3>⚠️ Unassigned Students</h3>
+                <div id="unassignedContent"></div>
+            </div>
+
+            <div class="download-section">
+                <button class="download-btn" onclick="downloadTeamReport()">📥 Download Team Report</button>
+                <button class="download-btn secondary-btn" onclick="downloadIndividualReport()">📥 Download Individual Report</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let students = [];
+        let clients = [];
+        let currentTab = 'teams';
+
+        document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                document.getElementById('fileName').textContent = `Selected: ${file.name}`;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    processCSV(e.target.result);
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function processCSV(csvText) {
+            try {
+                const lines = csvText.split('\n');
+                const headers = parseCSVLine(lines[0]);
+                
+                // Find relevant columns
+                const nameColIndex = headers.findIndex(h => h.includes('What is your name'));
+                const emailColIndex = headers.findIndex(h => h.includes('Email Address'));
+                const rankingCols = headers.map((header, index) => {
+                    if (header.includes('Please rank') && header.includes('client')) {
+                        const match = header.match(/\[(.*?)\]/);
+                        return {
+                            index: index,
+                            client: match ? match[1] : header,
+                            header: header
+                        };
+                    }
+                    return null;
+                }).filter(col => col !== null);
+
+                students = [];
+                clients = rankingCols.map(col => col.client);
+                
+                for (let i = 1; i < lines.length; i++) {
+                    if (lines[i].trim() === '') continue;
+                    
+                    const values = parseCSVLine(lines[i]);
+                    const studentName = values[nameColIndex];
+                    
+                    if (!studentName || studentName.trim() === '' || 
+                        studentName.includes('Graduates') || 
+                        studentName.includes('Priority') || 
+                        studentName.includes('TRANSCRIBED')) {
+                        continue;
+                    }
+
+                    const email = emailColIndex >= 0 ? values[emailColIndex] : '';
+                    const rankings = {};
+
+                    rankingCols.forEach(col => {
+                        const value = values[col.index];
+                        if (value && value.trim() !== '') {
+                            const cleanRanking = value.replace(/th|st|nd|rd/g, '');
+                            const rankNum = parseInt(cleanRanking);
+                            if (!isNaN(rankNum)) {
+                                rankings[col.client] = rankNum;
+                            }
+                        }
+                    });
+
+                    if (Object.keys(rankings).length > 0) {
+                        const sortedRankings = Object.entries(rankings).sort((a, b) => a[1] - b[1]);
+                        students.push({
+                            name: studentName.trim(),
+                            email: email.trim(),
+                            rankings: sortedRankings,
+                            topChoices: sortedRankings.slice(0, 3),
+                            totalScore: sortedRankings.reduce((sum, [_, rank]) => sum + rank, 0)
+                        });
+                    }
+                }
+
+                updateDisplay();
+                document.getElementById('resultsSection').style.display = 'block';
+                
+            } catch (error) {
+                showError('Error processing CSV file: ' + error.message);
+            }
+        }
+
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            result.push(current.trim());
+            return result;
+        }
+
+        function updateDisplay() {
+            updateStats();
+            updateTeamRecommendations();
+            updateIndividualTab();
+            updateClientsTab();
+            updateUnassignedTab();
+        }
+
+        function createTeamPairings() {
+            if (students.length === 0) return [];
+            
+            const algorithm = document.getElementById('pairingAlgorithm').value;
+            const maxTeamScore = parseInt(document.getElementById('maxTeamScore').value);
+            const minTeamSize = parseInt(document.getElementById('minTeamSize').value);
+            
+            let pairings = [];
+            
+            switch (algorithm) {
+                case 'top11':
+                    pairings = createTop11Pairings(maxTeamScore, minTeamSize);
+                    break;
+                case 'balanced':
+                    pairings = createBalancedPairings(maxTeamScore, minTeamSize);
+                    break;
+                case 'greedy':
+                    pairings = createGreedyPairings(maxTeamScore, minTeamSize);
+                    break;
+                case 'preference':
+                    pairings = createPreferencePairings(maxTeamScore, minTeamSize);
+                    break;
+            }
+            
+            return pairings;
+        }
+
+        function createGreedyPairings(maxTeamScore, minTeamSize) {
+            const pairings = [];
+            const usedStudents = new Set();
+            
+            // Sort students by total score (lower is better)
+            const sortedStudents = [...students].sort((a, b) => a.totalScore - b.totalScore);
+            
+            clients.forEach(client => {
+                const availableStudents = sortedStudents.filter(s => !usedStudents.has(s.name));
+                if (availableStudents.length === 0) return;
+                
+                // Find best student for this client
+                let bestStudent = null;
+                let bestRanking = Infinity;
+                
+                availableStudents.forEach(student => {
+                    const ranking = student.rankings.find(([c, _]) => c === client);
+                    if (ranking && ranking[1] < bestRanking) {
+                        bestRanking = ranking[1];
+                        bestStudent = student;
+                    }
+                });
+                
+                if (bestStudent && bestRanking <= maxTeamScore) {
+                    usedStudents.add(bestStudent.name);
+                    
+                    // Try to find a second student
+                    let secondStudent = null;
+                    if (minTeamSize === 2) {
+                        const remainingStudents = availableStudents.filter(s => s.name !== bestStudent.name);
+                        secondStudent = remainingStudents.find(s => {
+                            const ranking = s.rankings.find(([c, _]) => c === client);
+                            return ranking && ranking[1] <= maxTeamScore;
+                        });
+                        if (secondStudent) {
+                            usedStudents.add(secondStudent.name);
+                        }
+                    }
+                    
+                    pairings.push({
+                        client: client,
+                        members: [bestStudent, secondStudent].filter(Boolean),
+                        scores: [bestRanking, secondStudent ? secondStudent.rankings.find(([c, _]) => c === client)[1] : null].filter(Boolean),
+                        totalScore: bestRanking + (secondStudent ? secondStudent.rankings.find(([c, _]) => c === client)[1] : 0)
+                    });
+                }
+            });
+            
+            return pairings;
+        }
+
+        function createBalancedPairings(maxTeamScore, minTeamSize) {
+            const pairings = [];
+            const usedStudents = new Set();
+            
+            // Create matrix of student preferences for each client
+            const clientPreferences = {};
+            clients.forEach(client => {
+                const preferences = [];
+                students.forEach(student => {
+                    const ranking = student.rankings.find(([c, _]) => c === client);
+                    if (ranking) {
+                        preferences.push([student, ranking[1]]);
+                    }
+                });
+                preferences.sort((a, b) => a[1] - b[1]);
+                clientPreferences[client] = preferences;
+            });
+            
+            // Sort clients by how many students want them
+            const clientDemand = Object.entries(clientPreferences).map(([client, prefs]) => ({
+                client,
+                demand: prefs.length,
+                preferences: prefs
+            })).sort((a, b) => b.demand - a.demand);
+            
+            clientDemand.forEach(({ client, preferences }) => {
+                if (usedStudents.size >= students.length) return;
+                
+                const availableStudents = preferences.filter(([student, _]) => !usedStudents.has(student.name));
+                if (availableStudents.length === 0) return;
+                
+                const teamMembers = [];
+                const teamScores = [];
+                
+                // Add first student
+                const firstStudent = availableStudents[0][0];
+                const firstScore = availableStudents[0][1];
+                if (firstScore <= maxTeamScore) {
+                    teamMembers.push(firstStudent);
+                    teamScores.push(firstScore);
+                    usedStudents.add(firstStudent.name);
+                    
+                    // Add second student if required
+                    if (minTeamSize === 2 && availableStudents.length > 1) {
+                        const secondStudent = availableStudents[1][0];
+                        const secondScore = availableStudents[1][1];
+                        if (secondScore <= maxTeamScore) {
+                            teamMembers.push(secondStudent);
+                            teamScores.push(secondScore);
+                            usedStudents.add(secondStudent.name);
+                        }
+                    }
+                    
+                    pairings.push({
+                        client: client,
+                        members: teamMembers,
+                        scores: teamScores,
+                        totalScore: teamScores.reduce((sum, score) => sum + score, 0)
+                    });
+                }
+            });
+            
+            return pairings;
+        }
+
+        function createPreferencePairings(maxTeamScore, minTeamSize) {
+            const pairings = [];
+            const usedStudents = new Set();
+            
+            // Sort students by their top choice preference
+            const studentPreferences = students.map(student => ({
+                student,
+                topChoice: student.topChoices[0],
+                secondChoice: student.topChoices[1] || null
+            })).sort((a, b) => {
+                if (a.topChoice && b.topChoice) {
+                    return a.topChoice[1] - b.topChoice[1];
+                }
+                return 0;
+            });
+            
+            // Process students in order of preference strength
+            studentPreferences.forEach(({ student, topChoice, secondChoice }) => {
+                if (usedStudents.has(student.name)) return;
+                
+                if (topChoice && topChoice[1] <= maxTeamScore) {
+                    const client = topChoice[0];
+                    
+                    // Check if this client already has a team
+                    let existingTeam = pairings.find(p => p.client === client);
+                    
+                    if (!existingTeam) {
+                        // Create new team
+                        existingTeam = {
+                            client: client,
+                            members: [student],
+                            scores: [topChoice[1]],
+                            totalScore: topChoice[1]
+                        };
+                        pairings.push(existingTeam);
+                        usedStudents.add(student.name);
+                    } else if (existingTeam.members.length < 2 && minTeamSize === 2) {
+                        // Add to existing team
+                        existingTeam.members.push(student);
+                        existingTeam.scores.push(topChoice[1]);
+                        existingTeam.totalScore += topChoice[1];
+                        usedStudents.add(student.name);
+                    }
+                }
+            });
+            
+            return pairings;
+        }
+
+        function createTop11Pairings(maxTeamScore, minTeamSize) {
+            // Create exactly one team per student
+            const pairings = [];
+            
+            // First pass: Create a team for each student as lead
+            students.forEach((student, index) => {
+                // Get student's best client preference
+                const [bestClient, bestRanking] = student.rankings[0];
+                
+                // Create a team with this student as lead
+                pairings.push({
+                    client: bestClient,
+                    members: [student],
+                    scores: [bestRanking],
+                    totalScore: bestRanking,
+                    leadStudent: student.name,
+                    supportStudent: null,
+                    teamNumber: index + 1
+                });
+            });
+            
+            // Second pass: Assign each student as support to another team
+            // We need to ensure each team gets exactly one support student
+            const availableTeams = pairings.map((team, index) => ({ team, index })).filter(item => item.team.members.length === 1);
+            
+            students.forEach((student, studentIndex) => {
+                // Find the best available team for this student to support (different from their own team)
+                let bestSupportTeam = null;
+                let bestSupportRanking = Infinity;
+                let bestTeamIndex = -1;
+                
+                // Look through available teams except the student's own team
+                availableTeams.forEach(({ team, index: teamIndex }) => {
+                    if (teamIndex !== studentIndex) { // Not their own team
+                        // Find student's ranking for this team's client
+                        const ranking = student.rankings.find(([client, _]) => client === team.client);
+                        if (ranking && ranking[1] < bestSupportRanking) {
+                            bestSupportTeam = team;
+                            bestSupportRanking = ranking[1];
+                            bestTeamIndex = teamIndex;
+                        }
+                    }
+                });
+                
+                // Assign student as support to the best team found
+                if (bestSupportTeam) {
+                    bestSupportTeam.members.push(student);
+                    bestSupportTeam.scores.push(bestSupportRanking);
+                    bestSupportTeam.totalScore += bestSupportRanking;
+                    bestSupportTeam.supportStudent = student.name;
+                    
+                    // Remove this team from available teams so it can't get another support student
+                    const teamIndex = availableTeams.findIndex(item => item.index === bestTeamIndex);
+                    if (teamIndex !== -1) {
+                        availableTeams.splice(teamIndex, 1);
+                    }
+                }
+            });
+            
+            // Sort pairings by total score (lower is better)
+            pairings.sort((a, b) => a.totalScore - b.totalScore);
+            
+            return pairings;
+        }
+
+        function updateTeamRecommendations() {
+            const content = document.getElementById('teamsContent');
+            content.innerHTML = '';
+            
+            const pairings = createTeamPairings();
+            
+            if (pairings.length === 0) {
+                content.innerHTML = '<div class="error">No teams could be created. Please check your settings.</div>';
+                return;
+            }
+            
+            // Sort pairings by total score (lower is better)
+            pairings.sort((a, b) => a.totalScore - b.totalScore);
+            
+            pairings.forEach((pairing, index) => {
+                const teamCard = document.createElement('div');
+                teamCard.className = 'team-card';
+                
+                const teamScore = pairing.totalScore;
+                const scoreClass = teamScore <= 5 ? 'excellent' : teamScore <= 10 ? 'good' : teamScore <= 15 ? 'fair' : 'poor';
+                
+                let html = `
+                    <div class="team-header">
+                        <div class="client-name">${index + 1}. ${pairing.client}</div>
+                        <div class="team-score">Score: ${teamScore}</div>
+                    </div>
+                    <div class="team-members">
+                `;
+                
+                pairing.members.forEach((member, memberIndex) => {
+                    const score = pairing.scores[memberIndex];
+                    const rankSuffix = getRankSuffix(score);
+                    const role = memberIndex === 0 ? '👑 Lead Designer' : '🤝 Support Designer';
+                    const roleColor = memberIndex === 0 ? '#28a745' : '#17a2b8';
+                    
+                    html += `
+                        <div class="member-card">
+                            <div class="member-name">${member.name}</div>
+                            <div class="member-email">${member.email || 'No email'}</div>
+                            <div style="background: ${roleColor}; color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: bold; margin-bottom: 10px; text-align: center;">
+                                ${role}
+                            </div>
+                            <div class="member-ranking">
+                                <span>Ranking: <span class="rank-badge">${score}${rankSuffix}</span></span>
+                                <span class="compatibility-score">${getCompatibilityScore(score)}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+                
+                // Add team insights
+                if (pairing.members.length === 2) {
+                    const scoreDiff = Math.abs(pairing.scores[0] - pairing.scores[1]);
+                    const balanceClass = scoreDiff <= 2 ? 'excellent' : scoreDiff <= 4 ? 'good' : 'fair';
+                    
+                    html += `
+                        <div style="background: white; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                            <strong>Team Insights:</strong>
+                            <div style="margin-top: 10px;">
+                                <span style="margin-right: 20px;">Balance: <span class="compatibility-score">${getBalanceScore(scoreDiff)}</span></span>
+                                <span>Combined Preference: <span class="rank-badge">${teamScore}</span></span>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                teamCard.innerHTML = html;
+                content.appendChild(teamCard);
+            });
+            
+            // Add summary information
+            const algorithm = document.getElementById('pairingAlgorithm').value;
+            let summaryHTML = '';
+            
+            if (algorithm === 'top11') {
+                const usedStudents = new Set();
+                const leadStudents = new Set();
+                const supportStudents = new Set();
+                
+                pairings.forEach(pairing => {
+                    pairing.members.forEach(member => {
+                        usedStudents.add(member.name);
+                        // Check if this student is lead or support based on their role in this team
+                        if (pairing.leadStudent === member.name) {
+                            leadStudents.add(member.name);
+                        } else if (pairing.supportStudent === member.name) {
+                            supportStudents.add(member.name);
+                        }
+                    });
+                });
+                
+                const unassigned = students.filter(s => !usedStudents.has(s.name)).map(s => s.name);
+                
+                summaryHTML = `
+                    <div style="background: #e7f3ff; border: 1px solid #b3d9ff; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                        <h4 style="color: #0066cc; margin-bottom: 15px;">📊 All Students Balanced Algorithm Summary</h4>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 1.5rem; font-weight: bold; color: #0066cc;">${pairings.length}</div>
+                                <div style="font-size: 0.9rem; color: #666;">Teams Created</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 1.5rem; font-weight: bold; color: #0066cc;">${usedStudents.size}</div>
+                                <div style="font-size: 0.9rem; color: #666;">Students Assigned</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 1.5rem; font-weight: bold; color: #0066cc;">${leadStudents.size}</div>
+                                <div style="font-size: 0.9rem; color: #666;">Lead Roles</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 1.5rem; font-weight: bold; color: #0066cc;">${supportStudents.size}</div>
+                                <div style="font-size: 0.9rem; color: #666;">Support Roles</div>
+                            </div>
+                        </div>
+                        ${unassigned.length > 0 ? `
+                            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #b3d9ff;">
+                                <strong>Unassigned Students:</strong>
+                                <div style="margin-top: 10px; color: #666;">
+                                    ${unassigned.map(student => `• ${student}`).join('<br>')}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+            
+            if (summaryHTML) {
+                content.innerHTML = summaryHTML + content.innerHTML;
+            }
+            
+            // Update stats
+            updateStats();
+        }
+
+        function getCompatibilityScore(ranking) {
+            if (ranking <= 3) return 'Excellent';
+            if (ranking <= 6) return 'Good';
+            if (ranking <= 10) return 'Fair';
+            return 'Poor';
+        }
+
+        function getBalanceScore(difference) {
+            if (difference <= 2) return 'Excellent';
+            if (difference <= 4) return 'Good';
+            if (difference <= 6) return 'Fair';
+            return 'Poor';
+        }
+
+        function updateStats() {
+            const pairings = createTeamPairings();
+            const usedStudents = new Set();
+            pairings.forEach(pairing => {
+                pairing.members.forEach(member => usedStudents.add(member.name));
+            });
+            
+            document.getElementById('totalStudents').textContent = students.length;
+            document.getElementById('totalClients').textContent = clients.length;
+            document.getElementById('totalTeams').textContent = pairings.length;
+            document.getElementById('avgTeamScore').textContent = pairings.length > 0 ? 
+                Math.round(pairings.reduce((sum, p) => sum + p.totalScore, 0) / pairings.length * 10) / 10 : 0;
+        }
+
+        function updateIndividualTab() {
+            const content = document.getElementById('individualContent');
+            content.innerHTML = '';
+
+            students.forEach(student => {
+                const studentDiv = document.createElement('div');
+                studentDiv.style.cssText = 'background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid #667eea;';
+                
+                let html = `<div style="font-size: 1.3rem; font-weight: bold; color: #667eea; margin-bottom: 10px;">${student.name}</div>`;
+                if (student.email) {
+                    html += `<div style="color: #666; margin-bottom: 15px; font-size: 0.9rem;">${student.email}</div>`;
+                }
+
+                html += '<div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;">';
+                html += '<h4 style="color: #28a745; margin-bottom: 10px;">Top 3 Choices:</h4>';
+                student.topChoices.forEach((choice, index) => {
+                    const [client, rank] = choice;
+                    html += `<div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee;">
+                        <span>${index + 1}. ${client}</span>
+                        <span class="rank-badge">${rank}${getRankSuffix(rank)}</span>
+                    </div>`;
+                });
+                html += '</div>';
+
+                html += '<div style="background: white; padding: 15px; border-radius: 8px;">';
+                html += '<h4 style="color: #495057; margin-bottom: 10px;">All Rankings:</h4>';
+                student.rankings.forEach(([client, rank]) => {
+                    html += `<div style="display: flex; justify-content: space-between; align-items: center; padding: 5px 0;">
+                        <span>• ${client}</span>
+                        <span class="rank-badge">${rank}${getRankSuffix(rank)}</span>
+                    </div>`;
+                });
+                html += '</div>';
+
+                studentDiv.innerHTML = html;
+                content.appendChild(studentDiv);
+            });
+        }
+
+        function updateClientsTab() {
+            const content = document.getElementById('clientsContent');
+            content.innerHTML = '';
+
+            const clientStats = {};
+            clients.forEach(client => {
+                clientStats[client] = { totalScore: 0, count: 0, top3Count: 0, top5Count: 0 };
+            });
+            
+            students.forEach(student => {
+                student.rankings.forEach(([client, rank]) => {
+                    clientStats[client].totalScore += rank;
+                    clientStats[client].count += 1;
+                    if (rank <= 3) clientStats[client].top3Count += 1;
+                    if (rank <= 5) clientStats[client].top5Count += 1;
+                });
+            });
+
+            const sortedClients = Object.entries(clientStats)
+                .map(([client, stats]) => ({
+                    client,
+                    avgRanking: stats.totalScore / stats.count,
+                    top3Count: stats.top3Count,
+                    top5Count: stats.top5Count,
+                    totalCount: stats.count
+                }))
+                .sort((a, b) => a.avgRanking - b.avgRanking);
+
+            sortedClients.forEach(({ client, avgRanking, top3Count, top5Count, totalCount }) => {
+                const clientDiv = document.createElement('div');
+                clientDiv.style.cssText = 'background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;';
+                
+                clientDiv.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <strong style="font-size: 1.1rem;">${client}</strong>
+                        <div style="text-align: right; font-size: 0.9rem;">
+                            <div>Avg rank: <strong>${avgRanking.toFixed(1)}</strong></div>
+                            <div>Top 3: ${top3Count}/${totalCount} | Top 5: ${top5Count}/${totalCount}</div>
+                        </div>
+                    </div>
+                `;
+                
+                content.appendChild(clientDiv);
+            });
+        }
+
+        function updateUnassignedTab() {
+            const content = document.getElementById('unassignedContent');
+            content.innerHTML = '';
+            
+            const pairings = createTeamPairings();
+            const usedStudents = new Set();
+            pairings.forEach(pairing => {
+                pairing.members.forEach(member => usedStudents.add(member.name));
+            });
+            
+            const unassigned = students.filter(s => !usedStudents.has(s.name));
+            
+            if (unassigned.length === 0) {
+                content.innerHTML = '<div class="info-box">🎉 All students have been assigned to teams!</div>';
+                return;
+            }
+            
+            content.innerHTML = `
+                <div class="info-box">
+                    <strong>${unassigned.length} students remain unassigned.</strong>
+                    This may be due to ranking preferences or team size constraints.
+                </div>
+            `;
+            
+            unassigned.forEach(student => {
+                const studentDiv = document.createElement('div');
+                studentDiv.style.cssText = 'background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #ffc107;';
+                
+                let html = `<div style="font-size: 1.3rem; font-weight: bold; color: #856404; margin-bottom: 10px;">${student.name}</div>`;
+                if (student.email) {
+                    html += `<div style="color: #666; margin-bottom: 15px; font-size: 0.9rem;">${student.email}</div>`;
+                }
+                
+                html += '<div style="background: white; padding: 15px; border-radius: 8px;">';
+                html += '<h4 style="color: #856404; margin-bottom: 10px;">Top Choices:</h4>';
+                student.topChoices.forEach((choice, index) => {
+                    const [client, rank] = choice;
+                    html += `<div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee;">
+                        <span>${index + 1}. ${client}</span>
+                        <span class="rank-badge">${rank}${getRankSuffix(rank)}</span>
+                    </div>`;
+                });
+                html += '</div>';
+                
+                studentDiv.innerHTML = html;
+                content.appendChild(studentDiv);
+            });
+        }
+
+        function showTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            event.target.classList.add('active');
+            currentTab = tabName;
+        }
+
+        function getRankSuffix(rank) {
+            if (rank >= 10 && rank <= 20) return 'th';
+            const lastDigit = rank % 10;
+            if (lastDigit === 1) return 'st';
+            if (lastDigit === 2) return 'nd';
+            if (lastDigit === 3) return 'rd';
+            return 'th';
+        }
+
+        function downloadTeamReport() {
+            const pairings = createTeamPairings();
+            const usedStudents = new Set();
+            pairings.forEach(pairing => {
+                pairing.members.forEach(member => usedStudents.add(member.name));
+            });
+            
+            const unassigned = students.filter(s => !usedStudents.has(s.name)).map(s => s.name);
+            
+            let report = 'Team Pairing Recommendations Report\n';
+            report += '='.repeat(50) + '\n\n';
+            report += `Generated on: ${new Date().toLocaleString()}\n`;
+            report += `Algorithm: ${document.getElementById('pairingAlgorithm').value}\n`;
+            report += `Max Team Score: ${document.getElementById('maxTeamScore').value}\n`;
+            report += `Min Team Size: ${document.getElementById('minTeamSize').value}\n\n`;
+            
+            report += 'TEAM ASSIGNMENTS:\n';
+            report += '-'.repeat(30) + '\n';
+            
+            pairings.forEach((pairing, index) => {
+                report += `${index + 1}. ${pairing.client}\n`;
+                report += `   Team Score: ${pairing.totalScore}\n`;
+                pairing.members.forEach((member, memberIndex) => {
+                    const score = pairing.scores[memberIndex];
+                    report += `   ${memberIndex === 0 ? 'Lead' : 'Support'}: ${member.name} (${score}${getRankSuffix(score)})\n`;
+                });
+                report += '\n';
+            });
+            
+            if (unassigned.length > 0) {
+                report += 'UNASSIGNED STUDENTS:\n';
+                report += '-'.repeat(30) + '\n';
+                unassigned.forEach(student => {
+                    report += `• ${student}\n`;
+                });
+            }
+            
+            const blob = new Blob([report], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'team_pairing_recommendations.txt';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function downloadIndividualReport() {
+            let report = 'Individual Student Rankings Report\n';
+            report += '='.repeat(50) + '\n\n';
+            
+            students.forEach(student => {
+                report += `Student: ${student.name}\n`;
+                if (student.email) {
+                    report += `Email: ${student.email}\n`;
+                }
+                report += 'Top 3 Choices:\n';
+                student.topChoices.forEach((choice, index) => {
+                    const [client, rank] = choice;
+                    report += `  ${index + 1}. ${client} (${rank}${getRankSuffix(rank)})\n`;
+                });
+                report += 'All Rankings:\n';
+                student.rankings.forEach(([client, rank]) => {
+                    report += `  • ${client}: ${rank}${getRankSuffix(rank)}\n`;
+                });
+                report += '\n';
+            });
+            
+            const blob = new Blob([report], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'individual_rankings_report.txt';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+            document.querySelector('.upload-section').appendChild(errorDiv);
+        }
+    </script>
+</body>
+</html>
