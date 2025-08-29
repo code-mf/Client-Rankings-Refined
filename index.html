@@ -741,13 +741,28 @@
         }
 
         function createTop11Pairings(maxTeamScore, minTeamSize) {
-            // Create exactly one team per student
+            // Create exactly one team per student, but ensure unique clients
             const pairings = [];
+            const usedClients = new Set();
             
             // First pass: Create a team for each student as lead
             students.forEach((student, index) => {
-                // Get student's best client preference
-                const [bestClient, bestRanking] = student.rankings[0];
+                // Find the student's best available client (not already used)
+                let bestClient = null;
+                let bestRanking = Infinity;
+                
+                for (const [client, ranking] of student.rankings) {
+                    if (!usedClients.has(client)) {
+                        bestClient = client;
+                        bestRanking = ranking;
+                        break;
+                    }
+                }
+                
+                // If no available client found, use the student's best overall preference
+                if (!bestClient) {
+                    [bestClient, bestRanking] = student.rankings[0];
+                }
                 
                 // Create a team with this student as lead
                 pairings.push({
@@ -759,21 +774,25 @@
                     supportStudent: null,
                     teamNumber: index + 1
                 });
+                
+                // Mark this client as used
+                usedClients.add(bestClient);
             });
             
             // Second pass: Assign each student as support to another team
-            // We need to ensure each team gets exactly one support student
-            const availableTeams = pairings.map((team, index) => ({ team, index })).filter(item => item.team.members.length === 1);
+            // Use a smart assignment system that ensures all teams get 2 people
+            const availableTeams = pairings.map((team, index) => ({ team, index }));
+            const studentAssignments = new Set(); // Track which students have been assigned support roles
             
+            // First, try to assign students to teams based on their preferences
             students.forEach((student, studentIndex) => {
-                // Find the best available team for this student to support (different from their own team)
                 let bestSupportTeam = null;
                 let bestSupportRanking = Infinity;
                 let bestTeamIndex = -1;
                 
-                // Look through available teams except the student's own team
+                // Look through all available teams (excluding student's own team)
                 availableTeams.forEach(({ team, index: teamIndex }) => {
-                    if (teamIndex !== studentIndex) { // Not their own team
+                    if (teamIndex !== studentIndex && team.members.length === 1) { // Not own team and has space
                         // Find student's ranking for this team's client
                         const ranking = student.rankings.find(([client, _]) => client === team.client);
                         if (ranking && ranking[1] < bestSupportRanking) {
@@ -784,17 +803,57 @@
                     }
                 });
                 
-                // Assign student as support to the best team found
+                // Assign student to their best available team
                 if (bestSupportTeam) {
                     bestSupportTeam.members.push(student);
                     bestSupportTeam.scores.push(bestSupportRanking);
                     bestSupportTeam.totalScore += bestSupportRanking;
                     bestSupportTeam.supportStudent = student.name;
+                    studentAssignments.add(student.name);
                     
-                    // Remove this team from available teams so it can't get another support student
+                    // Remove this team from available teams
                     const teamIndex = availableTeams.findIndex(item => item.index === bestTeamIndex);
                     if (teamIndex !== -1) {
                         availableTeams.splice(teamIndex, 1);
+                    }
+                }
+            });
+            
+            // Ensure all teams have exactly 2 people by filling any remaining spots
+            const teamsNeedingSupport = availableTeams.filter(({ team }) => team.members.length === 1);
+            const unassignedStudents = students.filter(student => !studentAssignments.has(student.name));
+            
+            // Match remaining students to remaining teams
+            teamsNeedingSupport.forEach(({ team, index: teamIndex }, supportIndex) => {
+                if (supportIndex < unassignedStudents.length) {
+                    const student = unassignedStudents[supportIndex];
+                    
+                    // Find student's ranking for this team's client
+                    const ranking = student.rankings.find(([client, _]) => client === team.client);
+                    if (ranking) {
+                        team.members.push(student);
+                        team.scores.push(ranking[1]);
+                        team.totalScore += ranking[1];
+                        team.supportStudent = student.name;
+                        studentAssignments.add(student.name);
+                    }
+                }
+            });
+            
+            // If there are still teams with only 1 person, use rotation as final fallback
+            const finalTeamsNeedingSupport = pairings.filter(team => team.members.length === 1);
+            const finalUnassignedStudents = students.filter(student => !studentAssignments.has(student.name));
+            
+            finalTeamsNeedingSupport.forEach((team, index) => {
+                if (index < finalUnassignedStudents.length) {
+                    const student = finalUnassignedStudents[index];
+                    const ranking = student.rankings.find(([client, _]) => client === team.client);
+                    
+                    if (ranking) {
+                        team.members.push(student);
+                        team.scores.push(ranking[1]);
+                        team.totalScore += ranking[1];
+                        team.supportStudent = student.name;
                     }
                 }
             });
